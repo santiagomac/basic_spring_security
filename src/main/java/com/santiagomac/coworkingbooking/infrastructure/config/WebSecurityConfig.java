@@ -1,6 +1,6 @@
 package com.santiagomac.coworkingbooking.infrastructure.config;
 
-import com.santiagomac.coworkingbooking.infrastructure.adapter.JwtAuthenticationFilter;
+import com.santiagomac.coworkingbooking.infrastructure.driven_adapter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +33,7 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers("/api/auth/*")
+                                .requestMatchers("/api/auth/**")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())

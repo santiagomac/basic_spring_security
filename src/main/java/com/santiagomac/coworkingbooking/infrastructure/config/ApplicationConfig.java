@@ -1,6 +1,6 @@
 package com.santiagomac.coworkingbooking.infrastructure.config;
 
-import com.santiagomac.coworkingbooking.domain.repository.UserRepository;
+import com.santiagomac.coworkingbooking.domain.repository.UserGateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,9 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class ApplicationConfig {
 
-    private final UserRepository userRepository;
+    private final UserGateway userRepository;
 
-    public ApplicationConfig(UserRepository userRepository) {
+    public ApplicationConfig(UserGateway userRepository) {
         this.userRepository = userRepository;
     }
 

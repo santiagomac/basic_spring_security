@@ -1,8 +1,16 @@
 spring:
   application:
-    name: CoworkingBooking
+    name: ${APPLICATION_NAME}
+  datasource:
+    url: jdbc:h2:mem:test
+    driver-class-name: org.h2.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 security:
   jwt:
-    secret-key: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7420f8e8bcd0a7567c272e007b
-    expiration-time: 3600000
+    secret-key: ${SECRET_KEY}
+    expiration-time: ${EXPIRATION_TIME}

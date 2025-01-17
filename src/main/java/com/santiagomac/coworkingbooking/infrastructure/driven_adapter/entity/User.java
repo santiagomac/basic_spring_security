@@ -1,4 +1,4 @@
-package com.santiagomac.coworkingbooking.domain.entity;
+package com.santiagomac.coworkingbooking.infrastructure.driven_adapter.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
