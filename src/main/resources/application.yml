@@ -1,16 +1,15 @@
 spring:
   application:
-    name: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME:AuthService}
   datasource:
-    url: jdbc:h2:mem:test
-    driver-class-name: org.h2.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/psycho_appointments
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:santiagomac}
+    password: ${DB_PASSWORD:santim100}
   jpa:
     hibernate:
       ddl-auto: update
 
 security:
   jwt:
-    secret-key: ${SECRET_KEY}
-    expiration-time: ${EXPIRATION_TIME}
+    secret-key: ${SECRET_KEY:YzEyMzR0bXZxQzRmNTZ2cEFoUGVpMWdIajU3aWdoZ2g}
