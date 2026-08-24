@@ -1,6 +1,6 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.security;
 
-import com.santiagomac.auth.infrastructure.driven_adapter.jpa.user.User;
+import com.santiagomac.auth.infrastructure.driven_adapter.jpa.user.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +15,7 @@ public class AuthUser implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1905122041950251207L;
 
-    private final User user;
+    private final UserEntity userEntity;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -24,12 +24,12 @@ public class AuthUser implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword();
+        return userEntity.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return userEntity.getEmail();
     }
 
     @Override
@@ -49,6 +49,6 @@ public class AuthUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getIsActive();
+        return userEntity.getIsActive();
     }
 }

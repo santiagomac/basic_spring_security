@@ -3,8 +3,8 @@ package com.santiagomac.auth.application.usecases;
 import com.santiagomac.auth.application.dto.RegisterRequest;
 import com.santiagomac.auth.application.dto.RegisterResponse;
 import com.santiagomac.auth.application.ports.out.PasswordPort;
-import com.santiagomac.auth.domain.model.UserGateway;
-import com.santiagomac.auth.infrastructure.driven_adapter.jpa.user.User;
+import com.santiagomac.auth.domain.model.user.UserGateway;
+import com.santiagomac.auth.infrastructure.driven_adapter.jpa.user.UserEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ public class RegisterUseCase {
 
     public RegisterResponse signup(RegisterRequest registerRequest) {
         var passwordEncrypted = this.passwordPort.encryptPassword(registerRequest.getPassword());
-        var user = User
+        var user = UserEntity
                 .builder()
                 .name(registerRequest.getName())
                 .lastName(registerRequest.getLastName())

@@ -1,7 +1,10 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.jpa.user;
 
+import com.santiagomac.auth.domain.model.user.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +18,7 @@ import java.util.UUID;
 @Builder(toBuilder = true)
 @Entity
 @Table(name = "users")
-public class User implements Serializable {
+public class UserEntity implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1905122041950251207L;
@@ -24,18 +27,18 @@ public class User implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    private String name;
-    private String lastName;
     private String email;
     private String password;
-    private String phone;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RoleEnum role;
+    private boolean enabled;
 
-    @Column(insertable = false)
-    private Boolean isActive;
-
+    @CreationTimestamp
     @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(insertable = false)
     private LocalDateTime updatedAt;
 }

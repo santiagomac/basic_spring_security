@@ -1,6 +1,7 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.jpa.user;
 
-import com.santiagomac.auth.domain.model.UserGateway;
+import com.santiagomac.auth.domain.model.user.UserModel;
+import com.santiagomac.auth.domain.model.user.UserGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,12 +15,21 @@ public class UserRepositoryAdapter implements UserGateway {
 
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return this.userRepository.findByEmail(email);
+    public Optional<UserModel> findByEmail(String email) {
+        return this.userRepository.findByEmail(email)
+                .map(entity -> UserModel.builder()
+                        .email(entity.getEmail())
+                        .password(entity.getPassword())
+                        .enabled(entity.isEnabled())
+                        .role(entity.getRole())
+                        .createdAt(entity.getCreatedAt())
+                        .updatedAt(entity.getUpdatedAt())
+                        .build()
+                );
     }
 
     @Override
-    public User save(User user) {
-        return this.userRepository.save(user);
+    public UserEntity save(UserEntity userEntity) {
+        return this.userRepository.save(userEntity);
     }
 }

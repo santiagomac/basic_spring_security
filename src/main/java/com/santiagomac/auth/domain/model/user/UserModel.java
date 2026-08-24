@@ -1,42 +1,35 @@
-package com.santiagomac.auth.domain.model;
+package com.santiagomac.auth.domain.model.user;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.regex.Pattern;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class UserModel {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
-    private String name;
-    private String lastName;
     private String email;
     private String password;
-    private String phone;
-    private Boolean isActive;
+    private boolean enabled;
+    private RoleEnum role;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private UserModel(String name, String lastName, String email, String password, String phone, Boolean isActive) {
-        this.name = name;
-        this.lastName = lastName;
+    public UserModel(String email, String password, boolean enabled, RoleEnum role, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.email = email;
         this.password = password;
-        this.phone = phone;
-        this.isActive = isActive;
-    }
-
-    public static UserModel createUser(String name, String lastName, String email, String password, String phone, Boolean isActive) {
-        validEmail(email);
-        validPassword(password);
-
-        return new UserModel(name, lastName, email, password, phone, isActive);
+        this.enabled = enabled;
+        this.role = role;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     private static void validEmail(String email) {
@@ -51,4 +44,5 @@ public class UserModel {
             throw new IllegalArgumentException("Password must be at least 8 characters");
         }
     }
+
 }
