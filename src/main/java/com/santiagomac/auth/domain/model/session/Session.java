@@ -1,4 +1,4 @@
-package com.santiagomac.auth.application.dto;
+package com.santiagomac.auth.domain.model.session;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,11 +12,10 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
-public class RegisterRequest {
-
-    private String email;
-    private String password;
-    private UUID roleId;
-
+@Builder(toBuilder=true)
+public class Session {
+    private UUID id;
+    private String accessToken;
+    private String refreshToken;
+    private UUID userId;
 }
