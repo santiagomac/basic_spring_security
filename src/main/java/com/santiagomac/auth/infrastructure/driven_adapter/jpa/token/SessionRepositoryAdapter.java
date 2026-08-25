@@ -1,7 +1,7 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.jpa.token;
 
 import com.santiagomac.auth.domain.model.session.Session;
-import com.santiagomac.auth.domain.model.session.SessionGateway;
+import com.santiagomac.auth.application.ports.out.SessionGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

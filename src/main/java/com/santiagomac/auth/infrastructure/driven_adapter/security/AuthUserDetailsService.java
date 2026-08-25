@@ -1,8 +1,8 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.security;
 
 import com.santiagomac.auth.domain.model.user.RoleEnum;
-import com.santiagomac.auth.domain.model.user.RoleGateway;
-import com.santiagomac.auth.domain.model.user.UserGateway;
+import com.santiagomac.auth.application.ports.out.RoleGateway;
+import com.santiagomac.auth.application.ports.out.UserGateway;
 import com.santiagomac.auth.domain.model.user.UserModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;

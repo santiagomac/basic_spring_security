@@ -2,7 +2,7 @@ package com.santiagomac.auth.infrastructure.driven_adapter.jpa.role;
 
 import com.santiagomac.auth.domain.model.exceptions.NotFoundException;
 import com.santiagomac.auth.domain.model.user.RoleEnum;
-import com.santiagomac.auth.domain.model.user.RoleGateway;
+import com.santiagomac.auth.application.ports.out.RoleGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

@@ -3,7 +3,7 @@ package com.santiagomac.auth.application.usecases;
 import com.santiagomac.auth.application.dto.RegisterRequest;
 import com.santiagomac.auth.application.dto.RegisterResponse;
 import com.santiagomac.auth.application.ports.out.PasswordPort;
-import com.santiagomac.auth.domain.model.user.UserGateway;
+import com.santiagomac.auth.application.ports.out.UserGateway;
 import com.santiagomac.auth.domain.model.user.UserModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

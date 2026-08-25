@@ -1,7 +1,7 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.jpa.user;
 
 import com.santiagomac.auth.domain.model.user.UserModel;
-import com.santiagomac.auth.domain.model.user.UserGateway;
+import com.santiagomac.auth.application.ports.out.UserGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
