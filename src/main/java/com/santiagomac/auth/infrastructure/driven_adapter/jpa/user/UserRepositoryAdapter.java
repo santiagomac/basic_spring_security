@@ -17,16 +17,7 @@ public class UserRepositoryAdapter implements UserGateway {
     @Override
     public Optional<UserModel> findByEmail(String email) {
         return this.userRepository.findByEmail(email)
-                .map(entity -> UserModel.builder()
-                        .id(entity.getId())
-                        .email(entity.getEmail())
-                        .password(entity.getPassword())
-                        .enabled(entity.isEnabled())
-                        .roleId(entity.getRoleId())
-                        .createdAt(entity.getCreatedAt())
-                        .updatedAt(entity.getUpdatedAt())
-                        .build()
-                );
+                .map(this::toModel);
     }
 
     @Override

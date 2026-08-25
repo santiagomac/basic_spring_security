@@ -5,6 +5,7 @@ import com.santiagomac.auth.domain.model.session.SessionGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -32,6 +33,7 @@ public class SessionRepositoryAdapter implements SessionGateway {
 
     private SessionEntity toEntity(Session session) {
         return SessionEntity.builder()
+                .id(Objects.isNull(session.getId()) ? null : session.getId())
                 .refreshToken(session.getRefreshToken())
                 .accessToken(session.getAccessToken())
                 .userId(session.getUserId())
@@ -40,6 +42,7 @@ public class SessionRepositoryAdapter implements SessionGateway {
 
     private Session toModel(SessionEntity entity) {
         return Session.builder()
+                .id(entity.getId())
                 .refreshToken(entity.getRefreshToken())
                 .userId(entity.getUserId())
                 .accessToken(entity.getAccessToken())

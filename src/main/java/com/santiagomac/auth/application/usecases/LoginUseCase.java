@@ -3,6 +3,7 @@ package com.santiagomac.auth.application.usecases;
 import com.santiagomac.auth.application.dto.AuthRequest;
 import com.santiagomac.auth.application.dto.AuthResponse;
 import com.santiagomac.auth.application.ports.out.JwtTokenPort;
+import com.santiagomac.auth.domain.model.exceptions.NotFoundException;
 import com.santiagomac.auth.domain.model.session.Session;
 import com.santiagomac.auth.domain.model.session.SessionGateway;
 import com.santiagomac.auth.domain.model.user.UserGateway;
@@ -37,12 +38,16 @@ public class LoginUseCase {
         String accessToken = jwtTokenPort.generateAccessToken(authentication.getName(), scope);
         String refreshToken = jwtTokenPort.generateRefreshToken(authentication.getName(), scope);
 
-        Optional<UserModel> user = userGateway.findByEmail(authRequest.getEmail());
+        Optional<UserModel> optionalUser = userGateway.findByEmail(authRequest.getEmail());
+
+        if (optionalUser.isEmpty()) {
+            throw new NotFoundException("User not found to refresh the token");
+        }
 
         Session session = Session.builder()
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
-                .userId(user.get().getId())
+                .userId(optionalUser.get().getId())
                 .build();
 
         Session sessionCreated = sessionGateway.createSession(session);

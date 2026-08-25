@@ -39,6 +39,7 @@ public class UserModel {
         this.roleId = roleId;
         this.email = email;
         this.password = password;
+        this.enabled = true;
     }
 
     public static UserModel createNewUser(String email, String password, UUID roleId) {

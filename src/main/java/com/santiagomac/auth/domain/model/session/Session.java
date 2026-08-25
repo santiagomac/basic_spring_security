@@ -14,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder(toBuilder=true)
 public class Session {
+    private UUID id;
     private String accessToken;
     private String refreshToken;
     private UUID userId;
