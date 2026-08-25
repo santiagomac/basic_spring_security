@@ -8,8 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class AuthResponse {
-
-    private String token;
-    private long expiresAt;
-    private String username;
+    private String accessToken;
+    private String refreshToken;
 }

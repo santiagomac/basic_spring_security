@@ -17,7 +17,7 @@ public class JwtTokenService {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
-    public String generateToken(Authentication authentication) {
+    public String generateAccessToken(Authentication authentication, boolean isAccessToken) {
         Instant now = Instant.now();
         String scope = authentication
                 .getAuthorities()
@@ -27,7 +27,7 @@ public class JwtTokenService {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("auth_service")
                 .issuedAt(now)
-                .expiresAt(now.plus(15, ChronoUnit.MINUTES))
+                .expiresAt(isAccessToken ? now.plus(15, ChronoUnit.MINUTES) : now.plus(7, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("roles", scope)
                 .build();
