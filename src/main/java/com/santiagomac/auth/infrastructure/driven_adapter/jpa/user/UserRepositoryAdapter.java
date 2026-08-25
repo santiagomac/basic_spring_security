@@ -30,9 +30,10 @@ public class UserRepositoryAdapter implements UserGateway {
     }
 
     @Override
-    public UserEntity save(UserModel userModel) {
+    public UserModel save(UserModel userModel) {
         UserEntity userEntity = this.toEntity(userModel);
-        return this.userRepository.save(userEntity);
+        UserEntity savedEntity = this.userRepository.save(userEntity);
+        return this.toModel(savedEntity);
     }
 
     private UserEntity toEntity(UserModel model) {
@@ -40,6 +41,18 @@ public class UserRepositoryAdapter implements UserGateway {
                 .email(model.getEmail())
                 .password(model.getPassword())
                 .roleId(model.getRoleId())
+                .build();
+    }
+
+    private UserModel toModel(UserEntity entity) {
+        return UserModel.builder()
+                .id(entity.getId())
+                .email(entity.getEmail())
+                .password(entity.getPassword())
+                .enabled(entity.isEnabled())
+                .roleId(entity.getRoleId())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 }
