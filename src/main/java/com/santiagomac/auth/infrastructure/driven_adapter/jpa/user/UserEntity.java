@@ -1,6 +1,5 @@
 package com.santiagomac.auth.infrastructure.driven_adapter.jpa.user;
 
-import com.santiagomac.auth.domain.model.user.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,16 +28,14 @@ public class UserEntity implements Serializable {
 
     private String email;
     private String password;
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RoleEnum role;
-    private boolean enabled;
+    private UUID roleId;
+    @Builder.Default
+    private boolean enabled = true;
 
     @CreationTimestamp
-    @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(insertable = false)
     private LocalDateTime updatedAt;
 }

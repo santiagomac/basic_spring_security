@@ -7,5 +7,5 @@ import java.util.Optional;
 public interface UserGateway {
     Optional<UserModel> findByEmail(String email);
 
-    UserEntity save(UserEntity userEntity);
+    UserEntity save(UserModel userModel);
 }

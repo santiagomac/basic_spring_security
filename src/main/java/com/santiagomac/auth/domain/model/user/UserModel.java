@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Getter
@@ -16,20 +17,35 @@ public class UserModel {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
+    private UUID id;
     private String email;
     private String password;
     private boolean enabled;
-    private RoleEnum role;
+    private UUID roleId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public UserModel(String email, String password, boolean enabled, RoleEnum role, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UserModel(UUID id, String email, String password, boolean enabled, UUID roleId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.enabled = enabled;
-        this.role = role;
+        this.roleId = roleId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public UserModel(String email, String password, UUID roleId) {
+        this.roleId = roleId;
+        this.email = email;
+        this.password = password;
+    }
+
+    public static UserModel createNewUser(String email, String password, UUID roleId) {
+        validEmail(email);
+        validPassword(password);
+
+        return new UserModel(email, password, roleId);
     }
 
     private static void validEmail(String email) {

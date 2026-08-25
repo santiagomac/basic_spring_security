@@ -4,7 +4,7 @@ import com.santiagomac.auth.application.dto.RegisterRequest;
 import com.santiagomac.auth.application.dto.RegisterResponse;
 import com.santiagomac.auth.application.ports.out.PasswordPort;
 import com.santiagomac.auth.domain.model.user.UserGateway;
-import com.santiagomac.auth.infrastructure.driven_adapter.jpa.user.UserEntity;
+import com.santiagomac.auth.domain.model.user.UserModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -17,16 +17,9 @@ public class RegisterUseCase {
 
     public RegisterResponse signup(RegisterRequest registerRequest) {
         var passwordEncrypted = this.passwordPort.encryptPassword(registerRequest.getPassword());
-        var user = UserEntity
-                .builder()
-                .name(registerRequest.getName())
-                .lastName(registerRequest.getLastName())
-                .email(registerRequest.getEmail())
-                .password(passwordEncrypted)
-                .phone(registerRequest.getPhone())
-                .build();
+        UserModel newUser = UserModel.createNewUser(registerRequest.getEmail(), passwordEncrypted, registerRequest.getRoleId());
 
-        var userCreated = this.userGateway.save(user);
+        var userCreated = this.userGateway.save(newUser);
         return RegisterResponse
                 .builder()
                 .id(userCreated.getId())

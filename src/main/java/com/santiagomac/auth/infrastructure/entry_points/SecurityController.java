@@ -4,6 +4,7 @@ import com.santiagomac.auth.application.dto.AuthRequest;
 import com.santiagomac.auth.application.dto.AuthResponse;
 import com.santiagomac.auth.application.dto.RegisterRequest;
 import com.santiagomac.auth.application.dto.RegisterResponse;
+import com.santiagomac.auth.application.usecases.AuthUseCase;
 import com.santiagomac.auth.application.usecases.LoginUseCase;
 import com.santiagomac.auth.application.usecases.RegisterUseCase;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,12 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Duration;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController {
+public class SecurityController {
 
     private final LoginUseCase loginUseCase;
     private final RegisterUseCase registerUseCase;
+    private final AuthUseCase authUseCase;
 
     @PostMapping("/signup")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
@@ -34,8 +38,20 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> authenticate(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
+    public ResponseEntity<Void> login(@RequestBody AuthRequest authRequest, HttpServletResponse response) {
         var session = this.loginUseCase.authenticate(authRequest);
+        return setCookies(response, session);
+    }
+
+    @PostMapping("/refreshToken")
+    public ResponseEntity<Void> refreshToken(@CookieValue("refresh_token") String refreshToken, HttpServletResponse response) {
+        AuthResponse session = this.authUseCase.refreshToken(refreshToken);
+
+        return setCookies(response, session);
+    }
+
+    @NonNull
+    private ResponseEntity<Void> setCookies(HttpServletResponse response, AuthResponse session) {
         ResponseCookie accessCookie = ResponseCookie
                 .from("access_token", session.getAccessToken())
                 .httpOnly(true)

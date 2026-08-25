@@ -1,4 +1,4 @@
-package com.santiagomac.auth.infrastructure.driven_adapter.jpa.token;
+package com.santiagomac.auth.infrastructure.driven_adapter.jpa.role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,15 +17,14 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder=true)
+@Builder(toBuilder = true)
 @Entity
-@Table(name = "sessions")
-public class SessionEntity {
+@Table(name = "roles")
+public class RoleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-    private String refreshToken;
-    private String accessToken;
-    private UUID userId;
+
+    private String name;
 }

@@ -1,7 +1,8 @@
 package com.santiagomac.auth.application.usecases;
 
-import com.santiagomac.auth.application.dto.AuthRequest;
 import com.santiagomac.auth.application.dto.AuthResponse;
+import com.santiagomac.auth.domain.model.exceptions.InvalidRefreshToken;
+import com.santiagomac.auth.domain.model.exceptions.RefreshTokenNotFound;
 import com.santiagomac.auth.domain.model.session.Session;
 import com.santiagomac.auth.domain.model.session.SessionGateway;
 import com.santiagomac.auth.domain.model.user.UserGateway;
@@ -17,34 +18,37 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class LoginUseCase {
+public class AuthUseCase {
 
+    private final SessionGateway sessionGateway;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService jwtTokenService;
     private final UserGateway userGateway;
-    private final SessionGateway sessionGateway;
 
-    public AuthResponse authenticate(AuthRequest authRequest) {
-        var token = new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword());
+    public AuthResponse refreshToken(String refreshToken) {
+        Optional<Session> optionalSession = this.sessionGateway.findByRefreshToken(refreshToken);
+        if (optionalSession.isEmpty()) {
+            throw new RefreshTokenNotFound("The provided refresh token not exists");
+        }
+
+        Session session = optionalSession.get();
+        if (!jwtTokenService.isValidToken(session.getRefreshToken())) {
+            throw new InvalidRefreshToken("The refresh token is invalid");
+        }
+
+        String email = jwtTokenService.getSubjectFromToken(session.getRefreshToken());
+        Optional<UserModel> user = userGateway.findByEmail(email);
+        var token = new UsernamePasswordAuthenticationToken(email, user.get().getPassword());
         Authentication authentication = authenticationManager.authenticate(token);
 
         String accessToken = jwtTokenService.generateToken(authentication, true);
-        String refreshToken = jwtTokenService.generateToken(authentication, false);
 
-        Optional<UserModel> user = userGateway.findByEmail(authRequest.getEmail());
+        session.setAccessToken(accessToken);
+        sessionGateway.updateSession(session);
 
-        Session session = Session.builder()
+        return AuthResponse.builder()
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
-                .userId(user.get().getId())
-                .build();
-
-        Session sessionCreated = sessionGateway.createSession(session);
-
-        return AuthResponse.
-                builder()
-                .accessToken(sessionCreated.getAccessToken())
-                .refreshToken(sessionCreated.getRefreshToken())
                 .build();
     }
 }

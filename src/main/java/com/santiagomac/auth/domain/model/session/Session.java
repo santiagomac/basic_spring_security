@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -14,4 +16,5 @@ import lombok.Setter;
 public class Session {
     private String accessToken;
     private String refreshToken;
+    private UUID userId;
 }

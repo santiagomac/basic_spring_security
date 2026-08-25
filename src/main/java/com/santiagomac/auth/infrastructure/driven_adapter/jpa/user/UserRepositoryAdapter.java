@@ -18,10 +18,11 @@ public class UserRepositoryAdapter implements UserGateway {
     public Optional<UserModel> findByEmail(String email) {
         return this.userRepository.findByEmail(email)
                 .map(entity -> UserModel.builder()
+                        .id(entity.getId())
                         .email(entity.getEmail())
                         .password(entity.getPassword())
                         .enabled(entity.isEnabled())
-                        .role(entity.getRole())
+                        .roleId(entity.getRoleId())
                         .createdAt(entity.getCreatedAt())
                         .updatedAt(entity.getUpdatedAt())
                         .build()
@@ -29,7 +30,16 @@ public class UserRepositoryAdapter implements UserGateway {
     }
 
     @Override
-    public UserEntity save(UserEntity userEntity) {
+    public UserEntity save(UserModel userModel) {
+        UserEntity userEntity = this.toEntity(userModel);
         return this.userRepository.save(userEntity);
+    }
+
+    private UserEntity toEntity(UserModel model) {
+        return UserEntity.builder()
+                .email(model.getEmail())
+                .password(model.getPassword())
+                .roleId(model.getRoleId())
+                .build();
     }
 }

@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,7 +17,6 @@ public class RegisterRequest {
 
     private String email;
     private String password;
-    private String name;
-    private String lastName;
-    private String phone;
+    private UUID roleId;
+
 }

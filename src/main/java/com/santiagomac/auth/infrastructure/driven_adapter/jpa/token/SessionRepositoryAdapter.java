@@ -5,9 +5,11 @@ import com.santiagomac.auth.domain.model.session.SessionGateway;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 @RequiredArgsConstructor
-public class SessionEntityAdapter implements SessionGateway {
+public class SessionRepositoryAdapter implements SessionGateway {
     private final SessionRepository sessionRepository;
 
     @Override
@@ -16,16 +18,30 @@ public class SessionEntityAdapter implements SessionGateway {
         return toModel(sessionRepository.save(entity));
     }
 
+    @Override
+    public Optional<Session> findByRefreshToken(String refreshToken) {
+        return this.sessionRepository.findByRefreshToken(refreshToken)
+                .map(this::toModel);
+    }
+
+    @Override
+    public void updateSession(Session session) {
+        SessionEntity entity = toEntity(session);
+        this.sessionRepository.save(entity);
+    }
+
     private SessionEntity toEntity(Session session) {
         return SessionEntity.builder()
                 .refreshToken(session.getRefreshToken())
                 .accessToken(session.getAccessToken())
+                .userId(session.getUserId())
                 .build();
     }
 
     private Session toModel(SessionEntity entity) {
         return Session.builder()
                 .refreshToken(entity.getRefreshToken())
+                .userId(entity.getUserId())
                 .accessToken(entity.getAccessToken())
                 .build();
     }
