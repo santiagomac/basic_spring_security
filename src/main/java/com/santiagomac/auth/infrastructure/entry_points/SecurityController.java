@@ -66,8 +66,8 @@ public class SecurityController {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Lax")
-                .path("/auth")
-                .maxAge(Duration.ofDays(30))
+                .path("/api/v1/auth")
+                .maxAge(Duration.ofDays(7))
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
