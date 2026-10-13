@@ -5,17 +5,11 @@ plugins {
 }
 
 group = 'com.santiagomac'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0-SNAPSHOT'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
     }
 }
 
@@ -24,15 +18,26 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'org.postgresql:postgresql'
-    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Security (always on the classpath, only activated with APP_AUTH_ENABLED=true)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+    // Schema migrations. To use another database swap the driver and the flyway-database-* module.
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testRuntimeOnly 'com.h2database:h2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -41,3 +46,114 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+/*
+ * Module scaffolding (group "template").
+ *
+ *   ./gradlew createModule -PmoduleName=order [-PmodulePlural=orders]
+ *       Generates modules/order (domain, application, infrastructure + CRUD endpoints
+ *       /api/v1/orders) from templates/module and the next Flyway migration.
+ *
+ *   ./gradlew renameModule -PfromName=product -PmoduleName=item [-PfromPlural=..] [-PmodulePlural=..]
+ *       Renames an existing module (packages, classes, table, endpoints, migration file).
+ *       -PfromName can be omitted when there is a single module. Names: one lowercase word.
+ *       Do not rename a module whose migration was already applied to a shared database.
+ */
+def pluralOf = { String s -> s.endsWith('s') ? s + 'es' : s + 's' }
+def capitalize = { String s -> s.substring(0, 1).toUpperCase() + s.substring(1) }
+def requireName = { String prop ->
+    def v = project.findProperty(prop)
+    if (!v || !(v ==~ /[a-z][a-z0-9]*/)) {
+        throw new GradleException("-P${prop}=<lowercase-word> is required (letters and digits, starting with a letter)")
+    }
+    v.toString()
+}
+// Directory and package of the class annotated with @SpringBootApplication.
+def appBase = {
+    def javaDir = file('src/main/java')
+    def app = fileTree(javaDir).files.find { it.name.endsWith('.java') && it.text.contains('@SpringBootApplication') }
+    if (!app) throw new GradleException('No @SpringBootApplication class found')
+    def rel = app.parentFile.absolutePath.substring(javaDir.absolutePath.length() + 1)
+    [dir: app.parentFile, pkg: rel.replace(File.separator, '.')]
+}
+def migrationRoot = file('src/main/resources/db/migration')
+
+tasks.register('createModule') {
+    group = 'template'
+    description = 'Creates a new CRUD module: -PmoduleName=<name> [-PmodulePlural=<plural>]'
+    doLast {
+        def name = requireName('moduleName')
+        def plural = project.findProperty('modulePlural')?.toString() ?: pluralOf(name)
+        def base = appBase()
+        def target = new File(base.dir, "modules/${name}")
+        if (target.exists()) throw new GradleException("Module '${name}' already exists")
+
+        def fill = { String s ->
+            s.replace('__BASE__', base.pkg)
+                    .replace('__Modules__', capitalize(plural)).replace('__modules__', plural)
+                    .replace('__Module__', capitalize(name)).replace('__module__', name)
+        }
+        def tpl = file('templates/module')
+        fileTree(tpl).matching { include '**/*.java.tpl' }.files.each { f ->
+            def rel = f.absolutePath.substring(tpl.absolutePath.length() + 1)
+            def out = new File(target, fill(rel.substring(0, rel.length() - '.tpl'.length())))
+            out.parentFile.mkdirs()
+            out.setText(fill(f.getText('UTF-8')), 'UTF-8')
+        }
+
+        def last = fileTree(migrationRoot).files.collect { (it.name =~ /^V(\d+)__/) }
+                .findAll { it.find() }.collect { it.group(1) as int }.max() ?: 0
+        def migration = new File(migrationRoot, "common/V${last + 1}__create_${plural}_table.sql")
+        migration.parentFile.mkdirs()
+        migration.setText(fill(new File(tpl, 'migration.sql.tpl').getText('UTF-8')), 'UTF-8')
+
+        println "Module '${name}' created in ${target}"
+        println "Migration: ${migration.name}  ->  endpoints: /api/v1/${plural}"
+    }
+}
+
+tasks.register('renameModule') {
+    group = 'template'
+    description = 'Renames a module: -PfromName=<old> -PmoduleName=<new>'
+    doLast {
+        def base = appBase()
+        def modulesDir = new File(base.dir, 'modules')
+        def existing = (modulesDir.listFiles() ?: []).findAll { it.directory }*.name
+        def from = project.findProperty('fromName')?.toString() ?: (existing.size() == 1 ? existing[0] : null)
+        if (!from) throw new GradleException("-PfromName is required, existing modules: ${existing}")
+        def to = requireName('moduleName')
+        def fromPlural = project.findProperty('fromPlural')?.toString() ?: pluralOf(from)
+        def toPlural = project.findProperty('modulePlural')?.toString() ?: pluralOf(to)
+
+        def source = new File(modulesDir, from)
+        def target = new File(modulesDir, to)
+        if (!source.directory) throw new GradleException("Module '${from}' not found, existing: ${existing}")
+        if (target.exists()) throw new GradleException("Module '${to}' already exists")
+
+        def swap = { String s ->
+            s.replace(capitalize(fromPlural), capitalize(toPlural)).replace(fromPlural, toPlural)
+                    .replace(capitalize(from), capitalize(to)).replace(from, to)
+        }
+        def move = { File root, File f, File destRoot ->
+            def rel = f.absolutePath.substring(root.absolutePath.length() + 1)
+            def dest = new File(destRoot, swap(rel))
+            dest.parentFile.mkdirs()
+            dest.setText(swap(f.getText('UTF-8')), 'UTF-8')
+            f.delete()
+        }
+
+        fileTree(source).files.each { move(source, it, target) }
+        fileTree(migrationRoot).files.findAll { it.name.contains("_${fromPlural}_") }
+                .each { move(it.parentFile, it, it.parentFile) }
+        // keep tests that call the old endpoint in sync
+        fileTree('src/test').files.findAll { it.text.contains("/api/v1/${fromPlural}") }.each {
+            it.setText(it.getText('UTF-8').replace("/api/v1/${fromPlural}", "/api/v1/${toPlural}"), 'UTF-8')
+        }
+
+        def dirs = []
+        source.eachDirRecurse { dirs << it }
+        (dirs + [source]).sort { -it.path.length() }.each { if (it.exists() && it.list().length == 0) it.delete() }
+        println "Module '${from}' renamed to '${to}' (endpoints /api/v1/${toPlural})"
+    }
+}
+
