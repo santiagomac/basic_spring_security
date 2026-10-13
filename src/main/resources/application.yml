@@ -1,15 +1,55 @@
+# Every value can be overridden with an environment variable (see .env.example).
 spring:
   application:
-    name: ${APPLICATION_NAME}
+    name: ${APP_NAME:microservice-template}
+  autoconfigure:
+    # Users come from the optional auth module, never from Spring's generated default user.
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DATABASE}
-    driver-class-name: org.postgresql.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    # Either set DB_URL completely or just DB_HOST / DB_PORT / DB_NAME.
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:app_db}}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
   jpa:
+    open-in-view: false
+    show-sql: ${JPA_SHOW_SQL:false}
     hibernate:
-      ddl-auto: update
+      # Flyway owns the schema. Use "validate" to make Hibernate check it at startup.
+      ddl-auto: ${JPA_DDL_AUTO:none}
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    # The auth migrations are only picked up when the auth module is enabled.
+    locations: classpath:db/migration/common,classpath:db/migration/auth-${app.auth.enabled}
+    # Allows turning the auth module on in a database that already has module migrations applied.
+    out-of-order: true
+    # Lets you switch auth off again on a database where its migrations were already applied.
+    ignore-migration-patterns: "*:missing"
 
-security:
-  jwt:
-    secret-key: ${SECRET_KEY}
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  auth:
+    # false (default): no login, every endpoint is public. true: JWT authentication, see README.
+    enabled: ${APP_AUTH_ENABLED:false}
+    jwt:
+      secret: ${APP_AUTH_JWT_SECRET:}          # required when enabled, at least 32 characters
+      issuer: ${APP_AUTH_JWT_ISSUER:${spring.application.name}}
+      access-ttl: ${APP_AUTH_ACCESS_TTL:15m}
+      refresh-ttl: ${APP_AUTH_REFRESH_TTL:7d}
+    cookie:
+      secure: ${APP_AUTH_COOKIE_SECURE:true}   # set to false for plain-http local development
+      same-site: ${APP_AUTH_COOKIE_SAME_SITE:Lax}
+  cors:
+    # Comma separated list, e.g. https://app.example.com. Empty = CORS disabled.
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:}
